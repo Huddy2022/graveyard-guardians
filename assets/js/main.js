@@ -26,6 +26,7 @@ let rightEnemyStartPosX;
 let rightEnemyStartPosY;
 let enemySpawnInterval;
 
+
 // general setting of the game level
 let level = 1;
 /**
@@ -39,7 +40,7 @@ let level = 1;
  * @param {*} rightEnemyStartY - enemy right spawn coordinate Y
  */
 function levelSettings(
-  speed, levelJumpForce, leftEnemyStartX, leftEnemyStartY, rightEnemyStartX, rightEnemyStartY, lvlSpawnInterval){
+  speed, levelJumpForce, leftEnemyStartX, leftEnemyStartY, rightEnemyStartX, rightEnemyStartY, lvlSpawnInterval) {
   SPEED = speed;
   JUMP_FORCE = levelJumpForce;
   leftEnemyStartPosX = leftEnemyStartX;
@@ -50,7 +51,7 @@ function levelSettings(
 
 }
 // call levelSettings based on level
-switch(level){
+switch (level) {
   case 1:
     levelSettings(
       level1Config.playerSpeed,
@@ -354,7 +355,7 @@ scene("game", () => {
     pos(width() / 2, height() / 2),
     scale(0.12),
     origin("center"),
-    area({scale: 0.6, offset: vec2(0, 16)}),
+    area({ scale: 0.6, offset: vec2(0, 16) }),
     body({ isStatic: true }),
     {
       dir: vec2(1, 0),
@@ -366,7 +367,7 @@ scene("game", () => {
     if (currentPotion) {
       destroy(currentPotion); // Destroy the current potion if it exists
     }
-  
+
     // Define an array of positions where potions can spawn
     const spawnPositions = [
       pos(130, 495),
@@ -375,10 +376,10 @@ scene("game", () => {
       pos(750, 365),
       pos(750, 108),
     ];
-  
+
     // Choose a random position from the spawnPositions array
     const randomPosition = spawnPositions[Math.floor(Math.random() * spawnPositions.length)];
-  
+
     // Spawn a new potion at the selected position
     currentPotion = add([
       sprite("potion"),
@@ -567,7 +568,7 @@ scene("game", () => {
 
   // Handle space bar key press to fire bullets
   keyPress("space", () => {
-    play("gunshot", {volume:0.05});
+    play("gunshot", { volume: 0.05 });
     const bullet = createBullet(player);
   });
 
@@ -583,27 +584,6 @@ scene("game", () => {
       performAttack(enemy);
     }
 
-    // Randomly decide whether the enemy should jump
-    if (!enemy.jumping && Math.random() < 0.02) {
-      // Adjust the probability of jumping as needed
-      enemy.jumpForce = JUMP_FORCE / 2; // Set a negative jump force to move upwards (higher jump)
-      enemy.gravity = 800; // Set a positive gravity to bring the enemy down quickly
-      enemy.jumping = true; // Set a flag to indicate that the enemy is jumping
-    }
-
-    // Apply gravity to simulate jumping and falling
-    if (enemy.jumping) {
-      // Apply jump force to move upwards
-      enemy.move(0, enemy.jumpForce * dt());
-      enemy.jumpForce += enemy.gravity * dt(); // Apply gravity to reduce jump force over time
-
-      // Check if the enemy has landed on the ground
-      if (enemy.pos.y >= 440) {
-        enemy.pos.y = 440; // Snap the enemy to the ground
-        enemy.jumping = false; // Reset the jumping flag
-        enemy.jumpForce = 0; // Reset jump force
-      }
-    }
     const movementDirection = player.pos.sub(enemy.pos).unit();
     enemy.move(movementDirection.scale(2000 * dt()));
     // Flip the enemy sprite based on player's position
@@ -617,7 +597,7 @@ scene("game", () => {
 
     function performAttack(enemy) {
       if (canAttack) {
-        play("player-hit",{volume:0.05});
+        play("player-hit", { volume: 0.05 });
         // Check if the enemy can attack (based on timer)
         canAttack = false; // Set canAttack to false to prevent rapid attacks
         setTimeout(() => {
@@ -633,7 +613,7 @@ scene("game", () => {
 
         // Check if the player is out of health
         if (player.health <= 0) {
-          play("player-death", {volume:0.05});
+          play("player-death", { volume: 0.05 });
           musicPlayer.pause();
           // Switch to game over scene with the number of zombies killed as a parameter
           go("gameOver", { zombiesKilled: destroyedZombies });
@@ -668,11 +648,11 @@ scene("game", () => {
       origin("center"),
       scale(0.15),
       layer("bullet"),
-      area({scale: vec2(enemyAreaScale, 1)}),
+      area({ scale: vec2(enemyAreaScale, 1) }),
       body(),
       "enemy",
     ]);
-    
+
     // check the altitude of the player vs enemy
     // to make enemy walk horizontally if is grounded
     enemy.onUpdate(() => {
@@ -691,6 +671,11 @@ scene("game", () => {
     // Handle enemy movement towards the player
     enemy.action(() => {
       moveEnemy(enemy);
+
+      // Randomly jump with a 0.7% probability
+      if (Math.random() < 0.007 && enemy.grounded()) {
+        enemy.jump(0, -JUMP_FORCE);
+      }
     });
 
     function performAttack(enemy) {
@@ -702,7 +687,7 @@ scene("game", () => {
 
       // Check if the player is out of health
       if (player.health <= 0) {
-        play("player-death", {volume:0.04});
+        play("player-death", { volume: 0.04 });
         musicPlayer.pause();
         // Switch to game over scene with the number of zombies killed as a parameter
         go("gameOver", { zombiesKilled: destroyedZombies });
@@ -766,13 +751,13 @@ scene("game", () => {
     // Handle collisions with enemies
     bullet.collides("enemy", (enemy) => {
       // Decrease enemy health
-      play("zombie-hit", {volume:0.05});
+      play("zombie-hit", { volume: 0.05 });
       enemy.health = enemy.health || enemyHealth;
       enemy.health--; // Decrease enemy health by 1 each time they are hit
 
       // Check if the enemy has no health left
       if (enemy.health <= 0) {
-        play("enemy-death", {volume:0.05});
+        play("enemy-death", { volume: 0.05 });
         // If the enemy is out of health, destroy it
         enemy.destroy();
         destroyedZombies++;
