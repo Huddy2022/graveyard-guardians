@@ -24,6 +24,10 @@ let leftEnemyStartPosX;
 let leftEnemyStartPosY;
 let rightEnemyStartPosX;
 let rightEnemyStartPosY;
+let bottomRightEnemyStartPosX;
+let bottomRightEnemyStartPosY;
+let bottomLeftEnemyStartPosX;
+let bottomLeftEnemyStartPosY;
 let enemySpawnInterval;
 
 
@@ -38,15 +42,23 @@ let level = 1;
  * @param {*} leftEnemyStartY - enemy left spawn coordinate Y
  * @param {*} rightEnemyStartX - enemy right spawn coordinate X
  * @param {*} rightEnemyStartY - enemy right spawn coordinate Y
+ * @param {*} bottomRightEnemyStartPosX - enemy bottom right spawn coordinate X
+ * @param {*} bottomRightEnemyStartY - enemy bottom right spawn coordinate Y
+ * @param {*} bottomLeftEnemyStartPosX - enemy bottom left spawn coordinate X
+ * @param {*} bottomLeftEnemyStartY - enemy bottom left spawn coordinate Y
  */
 function levelSettings(
-  speed, levelJumpForce, leftEnemyStartX, leftEnemyStartY, rightEnemyStartX, rightEnemyStartY, lvlSpawnInterval) {
+  speed, levelJumpForce, leftEnemyStartX, leftEnemyStartY, rightEnemyStartX, rightEnemyStartY, bottomRightEnemyStartX, bottomRightEnemyStartY, bottomLeftEnemyStartX, bottomLeftEnemyStartY, lvlSpawnInterval) {
   SPEED = speed;
   JUMP_FORCE = levelJumpForce;
   leftEnemyStartPosX = leftEnemyStartX;
   leftEnemyStartPosY = leftEnemyStartY;
   rightEnemyStartPosX = rightEnemyStartX;
   rightEnemyStartPosY = rightEnemyStartY;
+  bottomRightEnemyStartPosX = bottomRightEnemyStartX;
+  bottomRightEnemyStartPosY = bottomRightEnemyStartY;
+  bottomLeftEnemyStartPosX = bottomLeftEnemyStartX;
+  bottomLeftEnemyStartPosY = bottomLeftEnemyStartY;
   enemySpawnInterval = lvlSpawnInterval;
 
 }
@@ -60,6 +72,10 @@ switch (level) {
       level1Config.leftEnemyStartPosY,
       level1Config.rightEnemyStartPosX,
       level1Config.rightEnemyStartPosY,
+      level1Config.bottomRightEnemyStartPosX,
+      level1Config.bottomRightEnemyStartPosY,
+      level1Config.bottomLeftEnemyStartPosX,
+      level1Config.bottomLeftEnemyStartPosY,
       level1Config.levelSpawnInterval
     );
 }
@@ -355,6 +371,7 @@ scene("game", () => {
     pos(width() / 2, height() / 2),
     scale(0.12),
     origin("center"),
+    layer("player"),
     area({ scale: 0.6, offset: vec2(0, 16) }),
     body({ isStatic: true }),
     {
@@ -498,8 +515,7 @@ scene("game", () => {
   let currentFrame = 0; // Track the current frame index
   let originalFacingDirection = false; // Variable to store the original facing direction
 
-  // Assuming you have an object called 'obj' that you want to animate
-
+  // Handle player movement
   onKeyDown("right", async () => {
     originalFacingDirection = false;
     currentSpriteIndex++;
@@ -515,7 +531,6 @@ scene("game", () => {
     player.dir = vec2(1, 0);
   });
 
-  // Handle player movement
   onKeyDown("left", async () => {
     originalFacingDirection = true;
     currentSpriteIndex++;
@@ -536,6 +551,10 @@ scene("game", () => {
       currentSpriteIndex = 0;
     }
 
+    if (player.grounded()) {
+      player.jump(400);
+    }
+
     const jumpForce = JUMP_FORCE;
 
     // Apply jump force to the player without changing the facing direction
@@ -549,6 +568,11 @@ scene("game", () => {
 
   keyDown("down", () => {
     player.move(0, 120);
+  });
+
+  keyPress("space", () => {
+    play("gunshot", { volume: 0.05 });
+    const bullet = createBullet(player);
   });
 
   keyPress("escape", () => {
@@ -565,12 +589,6 @@ scene("game", () => {
   let numSpawnedEnemies = 0;
 
   const enemyHealth = 3; // Set the initial health of enemies
-
-  // Handle space bar key press to fire bullets
-  keyPress("space", () => {
-    play("gunshot", { volume: 0.05 });
-    const bullet = createBullet(player);
-  });
 
   let canAttack = true; // Variable to control attack rate
 
@@ -636,8 +654,7 @@ scene("game", () => {
   }
 
   const spawnRandomEnemy = (x, y) => {
-    const randomSpawnPoint =
-      spawnPoints[Math.floor(Math.random() * spawnPoints.length)];
+
     const randomEnemySprite =
       enemySprites[Math.floor(Math.random() * enemySprites.length)];
 
@@ -647,9 +664,10 @@ scene("game", () => {
       pos(x, y),
       origin("center"),
       scale(0.15),
+      layer("enemy"),
       layer("bullet"),
-      area({ scale: vec2(enemyAreaScale, 1) }),
       body(),
+      area({ scale: vec2(enemyAreaScale, 1) }),
       "enemy",
     ]);
 
@@ -701,6 +719,8 @@ scene("game", () => {
   const spawnPoints = [
     { x: leftEnemyStartPosX, y: leftEnemyStartPosY },
     { x: rightEnemyStartPosX, y: rightEnemyStartPosY },
+    { x: bottomRightEnemyStartPosX, y: bottomRightEnemyStartPosY },
+    { x: bottomLeftEnemyStartPosX, y: bottomLeftEnemyStartPosY },
   ];
 
   const enemySprites = ["zombie_male", "zombie_female"];

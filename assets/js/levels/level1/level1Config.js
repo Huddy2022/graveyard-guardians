@@ -6,8 +6,12 @@ const level1Config = {
     leftEnemyStartPosY: 50,
     rightEnemyStartPosX: 890,
     rightEnemyStartPosY: 50,
+    bottomRightEnemyStartPosX: 890,
+    bottomRightEnemyStartPosY: 280,
+    bottomLeftEnemyStartPosX: 50,
+    bottomLeftEnemyStartPosY: 465,
     enemies: 20,
-    levelSpawnInterval: 2000
+    levelSpawnInterval: 3000
   };
 
   export default level1Config;
