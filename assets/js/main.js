@@ -17,7 +17,7 @@ let spawnInterval;
 
 let destroyedZombies = 0;
 let currentPotion = null;
-
+let enemySpeed = 200;
 let SPEED;
 let JUMP_FORCE;
 let leftEnemyStartPosX;
@@ -590,7 +590,7 @@ scene("game", () => {
   // Define a variable to keep track of the number of spawned enemies
   let numSpawnedEnemies = 0;
 
-  const enemyHealth = 3; // Set the initial health of enemies
+  let enemyHealth = 3; // Set the initial health of enemies
 
   let canAttack = true; // Variable to control attack rate
 
@@ -671,6 +671,14 @@ scene("game", () => {
       area({ scale: vec2(enemyAreaScale, 1) }),
       "enemy",
     ]);
+
+    console.log(destroyedZombies)
+
+    // Increase difficulty after the player kills 10 enemies
+    if (destroyedZombies >= 5) {
+      enemyHealth = 4; // Increase enemy health to 4
+      enemySpeed = 500; // Increase enemy speed to 200 (adjust as needed)
+    }
 
     // check the altitude of the player vs enemy
     // to make enemy walk horizontally if is grounded
