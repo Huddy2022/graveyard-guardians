@@ -584,6 +584,8 @@ scene("game", () => {
 
   loadSprite("zombie_male", "public/sprites/zombie_male/Walk1.png");
   loadSprite("zombie_female", "public/sprites/zombie_female/Walk1.png");
+  loadSprite("doll_ghost", "public/sprites/doll_ghost/doll_ghost_00.png");
+  loadSprite("grumpy_ghost", "public/sprites/grumpy_ghost/grumpy_ghost_00.png");
 
   // Define a variable to keep track of the number of spawned enemies
   let numSpawnedEnemies = 0;
@@ -598,7 +600,6 @@ scene("game", () => {
 
     // If the enemy is close to the player, perform attack
     if (distanceToPlayer < 50) {
-      // Adjust the threshold as needed
       performAttack(enemy);
     }
 
@@ -696,22 +697,6 @@ scene("game", () => {
       }
     });
 
-    function performAttack(enemy) {
-      // Decrease player's health by 1 when attacked by an enemy.
-      player.health--;
-
-      // Update health bar
-      updateHealthBar();
-
-      // Check if the player is out of health
-      if (player.health <= 0) {
-        play("player-death", { volume: 0.04 });
-        musicPlayer.pause();
-        // Switch to game over scene with the number of zombies killed as a parameter
-        go("gameOver", { zombiesKilled: destroyedZombies });
-      }
-    }
-
     return enemy;
   };
 
@@ -723,7 +708,7 @@ scene("game", () => {
     { x: bottomLeftEnemyStartPosX, y: bottomLeftEnemyStartPosY },
   ];
 
-  const enemySprites = ["zombie_male", "zombie_female"];
+  const enemySprites = ["zombie_male", "zombie_female", "doll_ghost", "grumpy_ghost"];
 
   spawnInterval = setInterval(() => {
     const randomSpawnPoint =
