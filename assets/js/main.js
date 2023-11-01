@@ -379,6 +379,20 @@ scene("game", () => {
     },
   ]);
 
+  let nextRoundText = add([
+    text("Next Round", 36),
+    pos(width() / 2, height() / 2),
+    origin("center"),
+    layer("ui"),
+    {
+      value: "Next Round",
+    },
+  ]);
+
+  // Initially hide the texts
+  nextRoundText.hidden = true;
+
+
   function spawnPotion() {
     if (currentPotion) {
       destroy(currentPotion); // Destroy the current potion if it exists
@@ -576,6 +590,7 @@ scene("game", () => {
 
   keyPress("escape", () => {
     musicPlayer.pause();
+    destroyedZombies = 0;
     go("home");
   });
 
@@ -604,13 +619,30 @@ scene("game", () => {
 
     const movementDirection = player.pos.sub(enemy.pos).unit();
 
-    if (destroyedZombies >= 10) {
+    if (destroyedZombies >= 11) {
       enemy.move(movementDirection.scale(10000 * dt()));
+      enemyHealth = 5;
+      nextRoundText.hidden = true;
+    } else if (destroyedZombies >= 10) {
+      enemy.move(movementDirection.scale(10000 * dt()));
+      enemyHealth = 5;
+      nextRoundText.hidden = false;
+    } else if (destroyedZombies >= 6) {
+      enemy.move(movementDirection.scale(6000 * dt()));
+      enemyHealth = 4;
+      nextRoundText.hidden = true;
     } else if (destroyedZombies >= 5) {
       enemy.move(movementDirection.scale(6000 * dt()));
+      nextRoundText.hidden = false;
+      enemyHealth = 4;
+      enemySpawnInterval = 1000;
     } else {
       enemy.move(movementDirection.scale(2000 * dt()));
+      nextRoundText.hidden = true;
+      enemySpawnInterval = 3000;
     }
+
+    console.log(nextRoundText.hidden)
     // Flip the enemy sprite based on player's position
     if (player.pos.x > enemy.pos.x) {
       // Player is on the right-hand side of the enemy
@@ -680,14 +712,6 @@ scene("game", () => {
 
     console.log(destroyedZombies)
 
-    // Increase difficulty after the player kills 10 enemies
-    if (destroyedZombies >= 10) {
-      enemyHealth = 5; // Increase enemy health to 5
-    } else if (destroyedZombies >=5) {
-      enemyHealth = 4
-    } else {
-      enemyHealth = 3
-    }
 
     console.log(enemyHealth)
 
