@@ -17,7 +17,6 @@ let spawnInterval;
 
 let destroyedZombies = 0;
 let currentPotion = null;
-let enemySpeed = 200;
 let SPEED;
 let JUMP_FORCE;
 let leftEnemyStartPosX;
@@ -604,7 +603,14 @@ scene("game", () => {
     }
 
     const movementDirection = player.pos.sub(enemy.pos).unit();
-    enemy.move(movementDirection.scale(2000 * dt()));
+
+    if (destroyedZombies >= 10) {
+      enemy.move(movementDirection.scale(10000 * dt()));
+    } else if (destroyedZombies >= 5) {
+      enemy.move(movementDirection.scale(6000 * dt()));
+    } else {
+      enemy.move(movementDirection.scale(2000 * dt()));
+    }
     // Flip the enemy sprite based on player's position
     if (player.pos.x > enemy.pos.x) {
       // Player is on the right-hand side of the enemy
@@ -675,10 +681,16 @@ scene("game", () => {
     console.log(destroyedZombies)
 
     // Increase difficulty after the player kills 10 enemies
-    if (destroyedZombies >= 5) {
-      enemyHealth = 4; // Increase enemy health to 4
-      enemySpeed = 500; // Increase enemy speed to 200 (adjust as needed)
+    if (destroyedZombies >= 10) {
+      enemyHealth = 5; // Increase enemy health to 5
+    } else if (destroyedZombies >=5) {
+      enemyHealth = 4
+    } else {
+      enemyHealth = 3
     }
+
+    console.log(enemyHealth)
+
 
     // check the altitude of the player vs enemy
     // to make enemy walk horizontally if is grounded
