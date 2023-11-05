@@ -14,7 +14,7 @@ kaboom({
 loadLevelAssets();
 
 let spawnInterval;
-
+let destroyedBosses = 0;
 let destroyedZombies = 0;
 let currentPotion = null;
 let SPEED;
@@ -380,10 +380,11 @@ scene("game", () => {
   ]);
 
   let nextRoundText = add([
-    text("Next Round", 36),
+    text("Zombie Horde Surge", 30),
     pos(width() / 2, height() / 2),
     origin("center"),
     layer("ui"),
+    color(255, 0, 0),
     {
       value: "Next Round",
     },
@@ -455,7 +456,7 @@ scene("game", () => {
   // Function to handle player's death
   function handlePlayerDeath() {
     musicPlayer.pause(); // Pause the music
-    go("gameOver", { zombiesKilled: destroyedZombies }); // Switch to the game over scene
+    go("gameOver", { zombiesKilled: destroyedZombies, bossesKilled: destroyedBosses }); // Switch to the game over scene
   }
 
   // Update function for the game scene
@@ -591,6 +592,7 @@ scene("game", () => {
   keyPress("escape", () => {
     musicPlayer.pause();
     destroyedZombies = 0;
+    destroyedBosses = 0;
     clearInterval(spawnInterval);
     go("home");
   });
@@ -624,11 +626,11 @@ scene("game", () => {
     if (destroyedZombies >= 16) {
       enemy.move(movementDirection.scale(14000 * dt()));
       enemyHealth = 6;
-      nextRoundText.hidden = false;
-    } if (destroyedZombies >= 15) {
+      nextRoundText.hidden = true;
+    } else if (destroyedZombies >= 15) {
       enemy.move(movementDirection.scale(14000 * dt()));
       enemyHealth = 6;
-      nextRoundText.hidden = true;
+      nextRoundText.hidden = false;
     } else if (destroyedZombies >= 11) {
       enemy.move(movementDirection.scale(10000 * dt()));
       enemyHealth = 5;
@@ -684,7 +686,7 @@ scene("game", () => {
           play("player-death", { volume: 0.05 });
           musicPlayer.pause();
           // Switch to game over scene with the number of zombies killed as a parameter
-          go("gameOver", { zombiesKilled: destroyedZombies });
+          go("gameOver", { zombiesKilled: destroyedZombies, bossesKilled: destroyedBosses });
         }
       }
     }
@@ -723,6 +725,7 @@ scene("game", () => {
 
     console.log(destroyedZombies)
 
+    console.log(destroyedBosses)
 
     console.log(enemyHealth)
 
@@ -815,7 +818,6 @@ scene("game", () => {
   const bossSprite = ["skeleton_bomb"];
 
   spawnInterval = setInterval(() => {
-    console.log(bossSpawned)
     const randomSpawnPoint =
       spawnPoints[Math.floor(Math.random() * spawnPoints.length)];
     spawnRandomEnemy(randomSpawnPoint.x, randomSpawnPoint.y);
@@ -826,6 +828,15 @@ scene("game", () => {
       spawnBossEnemy(randomSpawnPoint.x, randomSpawnPoint.y);
       bossSpawned = true;
     } else if (destroyedZombies === 15 && !bossSpawned) {
+      spawnBossEnemy(randomSpawnPoint.x, randomSpawnPoint.y);
+      bossSpawned = true;
+    } else if (destroyedZombies === 17 && !bossSpawned) {
+      spawnBossEnemy(randomSpawnPoint.x, randomSpawnPoint.y);
+      bossSpawned = true;
+    } else if (destroyedZombies === 19 && !bossSpawned) {
+      spawnBossEnemy(randomSpawnPoint.x, randomSpawnPoint.y);
+      bossSpawned = true;
+    } else if (destroyedZombies === 20 && !bossSpawned) {
       spawnBossEnemy(randomSpawnPoint.x, randomSpawnPoint.y);
       bossSpawned = true;
     } else {
@@ -880,7 +891,14 @@ scene("game", () => {
 
       // Check if the enemy has no health left
       if (enemy.health <= 0) {
-        play("enemy-death", { volume: 0.05 });
+        // Check if the enemy is a boss
+        if (enemy.isBoss) {
+          play("boss-death", { volume: 0.2 }); // Play the boss death sound
+          destroyedBosses++;
+        } else {
+          play("enemy-death", { volume: 0.05 }); // Play the regular enemy death sound
+        }
+
         // If the enemy is out of health, destroy it
         enemy.destroy();
         destroyedZombies++;
@@ -903,13 +921,13 @@ scene("gameOver", ({ zombiesKilled }) => {
     sprite("background_cemetery"),
     layer("bg"),
     scale(0.53),
-    text(`You were killed!\nZombies killed: ${zombiesKilled}`, 24),
+    text(`You were killed!\nZombies killed: ${zombiesKilled}\nBosses Killed: ${destroyedBosses}`, 24),
     origin("center"),
     pos(width() / 2, height() / 2),
   ]);
 
   const restartButton = add([
-    pos(width() / 2, height() / 2 + 60),
+    pos(width() / 2, height() / 2 + 80),
     origin("center"),
     layer("ui"),
     area(),
@@ -919,6 +937,7 @@ scene("gameOver", ({ zombiesKilled }) => {
       clickAction: () => {
         // Reset destroyedZombies to 0 when entering the game scene
         destroyedZombies = 0;
+        destroyedBosses = 0;
         musicPlayer.pause();
         go("home");
       },
@@ -1071,5 +1090,6 @@ loadSound("player-hit", "public/sound/player-hit.mp3");
 // Load the death sound
 loadSound("enemy-death", "public/sound/death.mp3");
 loadSound("player-death", "public/sound/player-death.mp3");
+loadSound("boss-death", "public/sound/scary-laugh.mp3");
 
 go("home");
