@@ -591,6 +591,7 @@ scene("game", () => {
   keyPress("escape", () => {
     musicPlayer.pause();
     destroyedZombies = 0;
+    clearInterval(spawnInterval);
     go("home");
   });
 
@@ -600,6 +601,7 @@ scene("game", () => {
   loadSprite("zombie_female", "public/sprites/zombie_female/Walk1.png");
   loadSprite("doll_ghost", "public/sprites/doll_ghost/doll_ghost_00.png");
   loadSprite("grumpy_ghost", "public/sprites/grumpy_ghost/grumpy_ghost_00.png");
+  loadSprite("skeleton_bomb", "public/sprites/skeleton_bomb/idle/skeleton-00_idle_00.png")
 
   // Define a variable to keep track of the number of spawned enemies
   let numSpawnedEnemies = 0;
@@ -619,7 +621,15 @@ scene("game", () => {
 
     const movementDirection = player.pos.sub(enemy.pos).unit();
 
-    if (destroyedZombies >= 11) {
+    if (destroyedZombies >= 16) {
+      enemy.move(movementDirection.scale(14000 * dt()));
+      enemyHealth = 6;
+      nextRoundText.hidden = false;
+    } if (destroyedZombies >= 15) {
+      enemy.move(movementDirection.scale(14000 * dt()));
+      enemyHealth = 6;
+      nextRoundText.hidden = true;
+    } else if (destroyedZombies >= 11) {
       enemy.move(movementDirection.scale(10000 * dt()));
       enemyHealth = 5;
       nextRoundText.hidden = true;
@@ -635,14 +645,11 @@ scene("game", () => {
       enemy.move(movementDirection.scale(6000 * dt()));
       nextRoundText.hidden = false;
       enemyHealth = 4;
-      enemySpawnInterval = 1000;
     } else {
       enemy.move(movementDirection.scale(2000 * dt()));
       nextRoundText.hidden = true;
-      enemySpawnInterval = 3000;
     }
 
-    console.log(nextRoundText.hidden)
     // Flip the enemy sprite based on player's position
     if (player.pos.x > enemy.pos.x) {
       // Player is on the right-hand side of the enemy
@@ -661,8 +668,12 @@ scene("game", () => {
           canAttack = true; // Allow the enemy to attack again after the delay
         }, 1000); // Set the delay in milliseconds (adjust as needed)
 
-        // decrease player's health by 1 when attacked by an enemy.
-        player.health--;
+        // Decrease player's health by 3 when attacked by a boss enemy.
+        if (enemy.isBoss) {
+          player.health -= 3;
+        } else {
+          player.health--; // Decrease player's health by 1 when attacked by a regular enemy.
+        }
         healthBar.color = rgb(255, 0, 0);
 
         // Update health bar
@@ -715,6 +726,8 @@ scene("game", () => {
 
     console.log(enemyHealth)
 
+    console.log(enemySpawnInterval)
+
 
     // check the altitude of the player vs enemy
     // to make enemy walk horizontally if is grounded
@@ -744,6 +757,52 @@ scene("game", () => {
     return enemy;
   };
 
+  const spawnBossEnemy = (x, y) => {
+
+    let enemyAreaScale = bossSprite ? 0.3 : 0.4;
+    const boss = add([
+      sprite(bossSprite[0]),
+      pos(x, y),
+      origin("center"),
+      scale(0.15),
+      layer("enemy"),
+      layer("bullet"),
+      body(),
+      area({ scale: vec2(enemyAreaScale, 1) }),
+      "enemy",
+      {
+        health: 10,
+        isBoss: true,
+      },
+    ]);
+
+    // check the altitude of the player vs enemy
+    // to make enemy walk horizontally if is grounded
+    boss.onUpdate(() => {
+      if (player.pos.y > boss.pos.y) {
+        if (player.pos.x > boss.pos.x) {
+          boss.move(SPEED / 6, 0);
+        } else {
+          boss.move(-(SPEED / 6), 0);
+        }
+      }
+    });
+
+    // Handle enemy movement towards the player
+    boss.action(() => {
+      moveEnemy(boss);
+
+      // Randomly jump with a 0.7% probability
+      if (Math.random() < 0.007 && boss.grounded()) {
+        boss.jump(0, -JUMP_FORCE);
+      }
+    });
+
+    return boss;
+  };
+
+  let bossSpawned = false;
+
   // Update function to spawn random enemies at random positions
   const spawnPoints = [
     { x: leftEnemyStartPosX, y: leftEnemyStartPosY },
@@ -753,12 +812,27 @@ scene("game", () => {
   ];
 
   const enemySprites = ["zombie_male", "zombie_female", "doll_ghost", "grumpy_ghost"];
+  const bossSprite = ["skeleton_bomb"];
 
   spawnInterval = setInterval(() => {
+    console.log(bossSpawned)
     const randomSpawnPoint =
       spawnPoints[Math.floor(Math.random() * spawnPoints.length)];
     spawnRandomEnemy(randomSpawnPoint.x, randomSpawnPoint.y);
-  }, enemySpawnInterval); // Spawn a new enemy every 2 seconds (adjust the interval as needed)
+    if (destroyedZombies === 5 && !bossSpawned) {
+      spawnBossEnemy(randomSpawnPoint.x, randomSpawnPoint.y);
+      bossSpawned = true;
+    } else if (destroyedZombies === 10 && !bossSpawned) {
+      spawnBossEnemy(randomSpawnPoint.x, randomSpawnPoint.y);
+      bossSpawned = true;
+    } else if (destroyedZombies === 15 && !bossSpawned) {
+      spawnBossEnemy(randomSpawnPoint.x, randomSpawnPoint.y);
+      bossSpawned = true;
+    } else {
+      bossSpawned = false;
+    }
+  }, enemySpawnInterval); // Spawn a new enemy every 3 seconds (adjust the interval as needed)
+
 
   function createBullet(player) {
     const bulletSpeed = 10000;
