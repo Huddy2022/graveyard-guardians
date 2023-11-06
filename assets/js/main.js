@@ -370,7 +370,6 @@ scene("game", () => {
     pos(width() / 2, height() / 2),
     scale(0.12),
     origin("center"),
-    layer("player"),
     area({ scale: 0.6, offset: vec2(0, 16) }),
     body({ isStatic: true }),
     {
@@ -380,7 +379,7 @@ scene("game", () => {
   ]);
 
   let nextRoundText = add([
-    text("Zombie Horde Surge", 30),
+    text("Zombie Horde", 30),
     pos(width() / 2, height() / 2),
     origin("center"),
     layer("ui"),
@@ -716,8 +715,6 @@ scene("game", () => {
       pos(x, y),
       origin("center"),
       scale(0.15),
-      layer("enemy"),
-      layer("bullet"),
       body(),
       area({ scale: vec2(enemyAreaScale, 1) }),
       "enemy",
@@ -768,8 +765,6 @@ scene("game", () => {
       pos(x, y),
       origin("center"),
       scale(0.15),
-      layer("enemy"),
-      layer("bullet"),
       body(),
       area({ scale: vec2(enemyAreaScale, 1) }),
       "enemy",
@@ -854,7 +849,6 @@ scene("game", () => {
       pos(player.pos.sub(0, -20)),
       origin("center"),
       area({ width: 8, height: 8 }),
-      layer("bullet"),
       {
         dir: bulletDirection,
       },
