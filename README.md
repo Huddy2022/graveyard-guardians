@@ -65,7 +65,7 @@ The purpose of the game is to provide players with a fun and entertaining experi
     ![game-diagram](assets/images/wireframe.png)
 
 -   ### Limitations
-    -   Zombies can't jump
+    -   Zombies get stuck on top of player
     -   The game has only one level
     -   Player can jump off screen
 
