@@ -3,7 +3,7 @@
 ![Graveyard Guardians Home screen banner](./assets/images/home_screen_banner.png)
 
 ## Table of contents
--   Live game can be found here [Graveyard Guardians](https://jodymurray.github.io/graveyard-guardians/)
+-   Live game can be found here [Graveyard Guardians](https://huddy2022.github.io/graveyard-guardians/)
 * [Purpose](#purpose)
 * [User Experience (UX)](#user-experience-ux)
     * [User Stories](#user-stories)
